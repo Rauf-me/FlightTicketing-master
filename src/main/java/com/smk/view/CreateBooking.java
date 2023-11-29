@@ -1,6 +1,7 @@
 package com.smk.view;
 
 import com.smk.MainView;
+import com.smk.dao.BookingDao;
 import com.smk.dao.LocationDao;
 import com.smk.dao.ScheduleDao;
 import com.smk.model.Location;
@@ -26,11 +27,15 @@ import java.util.Date;
 public class CreateBooking extends VerticalLayout {
     private LocationDao locationDao;
     private final ScheduleDao scheduleDao;
+    private static final BookingDao bookingDao = new BookingDao();
     public CreateBooking() {
         locationDao = new LocationDao();
         scheduleDao = new ScheduleDao();
+        BookingDao BookingDao = new BookingDao();
         createForm();
     }
+
+
 
     private void createForm(){
         setAlignItems(Alignment.STRETCH);
@@ -46,6 +51,13 @@ public class CreateBooking extends VerticalLayout {
         DatePicker arrivalDatePicker = new DatePicker("Tanggal kepulangan");
         Button searchButton =new Button("Search");
         searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        searchButton.addClickListener(clickEvent -> {
+            Collection<ScheduleDTO> scheduleDTOCollection = scheduleDao.searchSchedule(
+                    fromComboBox.getValue().getId(),
+                    toCombobox.getValue().getId(),
+                    Date.from(departureDatePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant())
+            );
+        });
         add(fromComboBox, toCombobox, departureDatePicker, arrivalDatePicker, searchButton);
 
         Grid<ScheduleDTO> grid = new Grid<>(ScheduleDTO.class, false);
@@ -65,6 +77,5 @@ public class CreateBooking extends VerticalLayout {
             grid.setItems(scheduleDTOCollection);
         });
     }
-
 
 }
